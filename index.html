@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050914">
+  <title>OpenAI &amp; AI — From Zero to the Future</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Arial, sans-serif;
+      background: #050914;
+      color: #eaf8ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: radial-gradient(ellipse at top, #0b1d31, #050914 65%);
+    }
+
+    main {
+      width: min(100%, 1100px);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.25rem, 3vw, 2rem);
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: #9bb7ca;
+    }
+
+    .player {
+      overflow: hidden;
+      border: 1px solid #1c3c52;
+      border-radius: 12px;
+      background: #000;
+      box-shadow: 0 18px 60px #0009;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      max-height: 75vh;
+      background: #000;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px;
+      background: #09111e;
+    }
+
+    button, input {
+      accent-color: #00c9eb;
+    }
+
+    button {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid #28506a;
+      border-radius: 6px;
+      background: #10253a;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover { background: #173650; }
+    button:focus-visible, input:focus-visible { outline: 2px solid #00c9eb; outline-offset: 3px; }
+
+    .volume {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: auto;
+    }
+
+    .volume input { width: min(30vw, 150px); }
+    #status { min-height: 1.25em; margin-top: 12px; color: #ffb6a6; }
+
+    .player:fullscreen {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      border-radius: 0;
+      background: #000;
+    }
+
+    .player:fullscreen video {
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      object-fit: contain;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 14px; }
+      .volume { width: 100%; margin-right: 0; }
+      .volume input { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>OpenAI &amp; Artificial Intelligence</h1>
+    <p>From Zero to the Future</p>
+    <section class="player" id="player" aria-label="Video player">
+      <video id="video" controls playsinline preload="metadata">
+        <source src="output/openai_ai_future.mp4" type="video/mp4">
+        Your browser does not support MP4 video playback.
+      </video>
+      <div class="toolbar" aria-label="Additional video controls">
+        <div class="volume">
+          <button id="mute" type="button" aria-pressed="false">Mute</button>
+          <label for="volume">Volume</label>
+          <input id="volume" type="range" min="0" max="100" value="100">
+        </div>
+        <button id="fullscreen" type="button" aria-pressed="false">Maximize</button>
+      </div>
+    </section>
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+  <script>
+    const player = document.querySelector("#player");
+    const video = document.querySelector("#video");
+    const volume = document.querySelector("#volume");
+    const mute = document.querySelector("#mute");
+    const fullscreen = document.querySelector("#fullscreen");
+    const status = document.querySelector("#status");
+
+    volume.addEventListener("input", () => {
+      video.volume = Number(volume.value) / 100;
+      video.muted = volume.value === "0";
+    });
+
+    mute.addEventListener("click", () => {
+      video.muted = !video.muted;
+    });
+
+    video.addEventListener("volumechange", () => {
+      volume.value = video.muted ? "0" : String(Math.round(video.volume * 100));
+      mute.textContent = video.muted ? "Unmute" : "Mute";
+      mute.setAttribute("aria-pressed", String(video.muted));
+    });
+
+    const syncFullscreenButton = () => {
+      const isFullscreen = document.fullscreenElement === player;
+      fullscreen.textContent = isFullscreen ? "Restore" : "Maximize";
+      fullscreen.setAttribute("aria-pressed", String(isFullscreen));
+    };
+
+    fullscreen.addEventListener("click", async () => {
+      status.textContent = "";
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else if (player.requestFullscreen) {
+          await player.requestFullscreen();
+        } else {
+          status.textContent = "Fullscreen is not supported by this browser.";
+          return;
+        }
+        syncFullscreenButton();
+      } catch (error) {
+        status.textContent = `Could not change fullscreen: ${error.message}`;
+      }
+    });
+
+    document.addEventListener("fullscreenchange", syncFullscreenButton);
+
+    video.addEventListener("error", () => {
+      status.textContent = "Could not load the video. Render it first with: python main.py --quality preview";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+Optional Blender helper is blender_renderer.py. Run: blender -b --python blender_renderer.py
+It creates a procedural neural-network preview scene; the default MP4 pipeline is the portable renderer in scenes.py.
